@@ -12,7 +12,7 @@ using namespace std;
 void loadInputStream(string &filename, ifstream &stream) {
     stream.open(filename.c_str());
     if (!stream) {
-        cerr << "cannot open" << /*stream*/ filename << " for reading" << endl;
+        cerr << "Cannot open " << filename << " for reading" << endl;
         exit(0);
     }
 }
@@ -32,17 +32,18 @@ vector<string> lineToItemsSplit(string &line, char &delimiter) {
     }
     rtnList.push_back(line);
     return rtnList;
+
 }
 
 class SegmentMap {
 
+    public:
     map<string, vector<string>> map_of_segments;
-    map<string, int> map_of_campaign_hits;
+    map<string, size_t> map_of_campaign_hits;
+    char delimiter = ' ';
 
-public:
     SegmentMap(ifstream &input_file) {
         string line;
-        char delimiter = ' ';
         int i = 0;
 
         while (getline(input_file, line)) {
@@ -70,54 +71,78 @@ public:
         return rtnCampaigns;
     }
 
-    void findCampaign(vector<string> segments) {
+    vector<string> findCountCampaignNames(const map<string, size_t> mapObj, const size_t count){
+        vector<string> rtnCampaigns;
+        for (auto camp = mapObj.begin(); camp != mapObj.end(); camp++) {
+            if(camp->second == count){
+                rtnCampaigns.push_back(camp->first);
+            }
+        }
+        return rtnCampaigns;
+    }
+
+    void findCampaign(vector<string> &segments) {
         vector<string> all_campaign = getMergedCampaigns(segments);
         set<string> distinct_campaign;
         map<string, size_t> count_campaign;
 
-        for (auto camp : all_campaign) {
+        for (auto &camp : all_campaign) {
             distinct_campaign.insert(camp);
         }
-        for (auto camp : distinct_campaign) {
+        for (auto &camp : distinct_campaign) {
             count_campaign[camp] = 0;
         }
-        for (auto camp : all_campaign) {
+        for (auto &camp : all_campaign) {
             count_campaign[camp] = ++count_campaign[camp];
         }
 
-        for (auto camp = count_campaign.begin(); camp != count_campaign.end(); camp++) {
-            cout << "Campaign: " << camp->first << "\t Count: " << camp->second << endl;
-        }
+//        for (auto camp = count_campaign.begin(); camp != count_campaign.end(); camp++) {
+//            cout << "Campaign: " << camp->first << "\t Count: " << camp->second << endl;
+//        }
         size_t number_of_campaign = distinct_campaign.size();
         set<size_t> distinct_count;
 
         for (auto camp = count_campaign.begin(); camp != count_campaign.end(); camp++) {
             distinct_count.insert(camp->second);
         }
+        size_t max_count = *max_element(distinct_count.begin(), distinct_count.end());
+        vector<string> max_Campaigns = findCountCampaignNames(count_campaign, max_count);
+        string campaign_name;
 
-        size_t max_count = 0;
-        string campaign_name = "";
-
-        if(number_of_campaign > distinct_count.size()){
+        if(max_Campaigns.size()>1){
             // This Extra Point Case
-        }else{
-            for (auto camp = count_campaign.begin(); camp != count_campaign.end(); camp++) {
-                if(camp->second > max_count){
-                    max_count = camp->second;
-                    campaign_name = camp->first;
-                }
+            count_campaign.clear();
+            for (auto &camp : max_Campaigns) {
+                count_campaign[camp] = map_of_campaign_hits[camp];
             }
-        }
+            distinct_count.clear();
 
+            for (auto camp = count_campaign.begin(); camp != count_campaign.end(); camp++) {
+                distinct_count.insert(camp->second);
+            }
+            size_t min_count = *min_element(distinct_count.begin(), distinct_count.end());
+            vector<string> min_Campaigns = findCountCampaignNames(count_campaign, min_count);
+
+            if(min_Campaigns.size()==1){
+                cout << "#################" << min_Campaigns.front() << "---------" << endl;
+            }else if(min_Campaigns.size()>1){
+                int rand_index = rand() % (int) min_Campaigns.size();
+                cout << "#################" << min_Campaigns[rand_index] << "---------" << endl;
+            }
+
+        }else if(max_Campaigns.size() == 1){
+            cout << "#################" << max_Campaigns.front() << "---------" << endl;
+        } else{
+            cout << "#################No Campaigns---------" << endl;
+        }
         map_of_campaign_hits[campaign_name] = ++map_of_campaign_hits[campaign_name];
-        cout << "campaign_name: " << campaign_name << " max_count: " << max_count << endl;
     }
 
     vector<string> addCampaign(const string &segment, const string &campaign) {
-        vector<string> my_segment = getCampaigns(segment);
-        my_segment.push_back(campaign);
+        vector<string> my_campaign = getCampaigns(segment);
+        my_campaign.push_back(campaign);
         map_of_campaign_hits[campaign] = 0; // Init hit count
-        map_of_segments[segment] = my_segment;
+        map_of_segments[segment] = my_campaign;
         return map_of_segments[segment];
     }
 
@@ -137,14 +162,38 @@ public:
 };
 
 // Driver program
-int main() {
-    string file_path = R"(C:\Users\shrey\CLionProjects\CampaignProject\file1.txt)";
+int main(int argc, char** argv)  {
     ifstream fileStream;
     string line;
+    string file_path;
+
+//    cout << "rand() % max_rand; " << rand() % 2 << endl;
+//    cout << "rand() % max_rand; " << rand() % 2 << endl;
+//    cout << "rand() % max_rand; " << rand() % 2 << endl;
+//    cout << "rand() % max_rand; " << rand() % 2 << endl;
+//    return 0;
+
+    if(argc < 2){
+        cout << "Please pass in Data input file! (Eg. Campaign.txt)" << endl;
+        return 0;
+    }
+
+    file_path = argv[1];
     loadInputStream(file_path, fileStream);
-    SegmentMap s1 = SegmentMap(fileStream);
-//    s1.displaySegmentMap();
-    vector<string> segments = {"10"};
-    s1.findCampaign(segments);
+    SegmentMap segmentMapObj = SegmentMap(fileStream);
+
+    while(line != "n"){
+        cout << "Enter input to find the campaign or 'n' to exit: " << endl;
+        getline (cin, line);
+        if (line != "n") {
+            vector<string> segments = lineToItemsSplit(line, segmentMapObj.delimiter);
+
+            //vector<string> segments = {"1025"};
+            segmentMapObj.findCampaign(segments);
+
+        }else{
+            break;
+        }
+    }
     return 0;
 }

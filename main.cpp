@@ -180,7 +180,7 @@ public:
     }
 
     void displaySegmentMap() {
-        /** This function is used to display segemnt-campaign map.
+        /** This function is used to display segment-campaign map.
         */
         cout << "***DISPLAY OF SEGMENT TO CAMPAIGN***" << endl;
         cout << "Segment\t\tCampaigns" << endl;
@@ -215,7 +215,7 @@ int main(int argc, char **argv) {
     segmentMapObj.displaySegmentMap();
 
     while (line != "n") {
-        cout << "Enter input to find the campaign or 'n' to exit: " << endl;
+        cout << "Enter input (eg. 3 4 10) to find the campaign or 'n' to exit: " << endl;
         getline(cin, line);
         if (line != "n") {
             vector<string> segments = lineToItemsSplit(line, segmentMapObj.delimiter);

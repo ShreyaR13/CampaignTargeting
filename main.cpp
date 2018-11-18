@@ -20,7 +20,7 @@ void loadInputStream(string &filename, ifstream &stream) {
         cerr << "Cannot open " << filename << " for reading" << endl;
         exit(0);
     }
-    cerr << "File successfully opened " << filename << " for reading" << endl;
+    cout << "File successfully opened " << filename << " for reading" << endl;
 }
 
 vector<string> lineToItemsSplit(string &line, char &delimiter) {
@@ -71,7 +71,7 @@ public:
     SegmentMap(ifstream &input_file) {
         /** Class constructor.
 
-        @param input_file It's Data input file steam.
+        @param input_file It's Data input file stream.
          */
         string line;
         int i = 0;
@@ -166,7 +166,7 @@ public:
     }
 
     vector<string> addCampaign(const string &segment, const string &campaign) {
-        /** This function uses adds campaign to segment-campaign map and initializes it's counter.
+        /** This function adds campaign to segment-campaign map and initializes it's counter.
 
         @param segments It takes name of the segment.
         @param campaign It takes name of the campaign.

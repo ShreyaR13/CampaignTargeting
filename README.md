@@ -23,8 +23,8 @@ Approach used:
 Case 1. 
 When user enters campaign segments, his input is split into string vector.
 The program associates every segment to its respective campaign and maintains the count of each campaign. The campaign with highest count is returned to the user.
-For eg. 3 4 5 10 2 200
-User input		Associated campaign		  Count
+#For eg. 3 4 5 10 2 200
+####User input__		####Associated campaign__       ####Count__
 3 4 10 2		      campaign_a			  count - 4
 3			            campaign_b			  count - 1
 3 4 200			      campaign_c			  count – 3
